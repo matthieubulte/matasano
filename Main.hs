@@ -34,6 +34,11 @@ xor a b = B.pack $ B.zipWith BI.xor a b
 xor1 :: Char -> B.ByteString -> B.ByteString
 xor1 c s = xor s $ (BC.pack . L.replicate (B.length s) ) c
 
+xorN :: String -> B.ByteString -> B.ByteString
+xorN k s = xor s (BC.pack key)
+    where
+        key = take (B.length s) (cycle k)
+
 trigramsOf :: String -> [String]
 trigramsOf []        = []
 trigramsOf [x]       = [[x, ' ', ' ']]
@@ -81,6 +86,15 @@ challenge4 = do
     let sorted   = L.sortBy (compare `on` third) bestXors
     return $ last sorted
 
+-- Challenge 5
+challenge5 :: Bool
+challenge5 = xored == expected
+    where
+        original = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"
+        expected = toB16 "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f"
+        key      = "ICE"
+        xored    = key `xorN` original
+
 main :: IO ()
 main = do
     putStr "Challenge 1: "
@@ -94,4 +108,7 @@ main = do
 
     putStr "Challenge 4: "
     challenge4 >>= print
+
+    putStr "Challenge 5: "
+    print challenge5
 
